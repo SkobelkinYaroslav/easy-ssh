@@ -31,8 +31,6 @@ func (e editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return e, e.updateState(newState)
 		}
-	case session.Session:
-		e.session = msg
 	}
 	return e, nil
 }

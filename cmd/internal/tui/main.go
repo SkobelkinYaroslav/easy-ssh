@@ -46,7 +46,7 @@ func InitMainModel() tea.Model {
 	}
 
 	m.pageModels = []tea.Model{
-		initListModel(sessions, m.updateState, &m.curState),
+		initListModel(sessions, m.updateState, m.curState),
 		initEditModel(sessions[initialState.selectedIdx], m.updateState),
 	}
 
@@ -62,7 +62,6 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case state:
 		m.curState = msg
 		if m.curState.page == editPage {
-			// Создаем новый editModel с выбранной сессией
 			m.pageModels[editPage] = initEditModel(m.sessions[m.curState.selectedIdx], m.updateState)
 		}
 	case tea.KeyMsg:

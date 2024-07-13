@@ -10,10 +10,10 @@ type listModel struct {
 	cursor      int
 	connections []session.Session
 	updateState func(state) tea.Cmd
-	curState    *state
+	curState    state
 }
 
-func initListModel(connections []session.Session, updateState func(state) tea.Cmd, curState *state) tea.Model {
+func initListModel(connections []session.Session, updateState func(state) tea.Cmd, curState state) tea.Model {
 	return listModel{
 		cursor:      0,
 		connections: connections,
@@ -37,7 +37,7 @@ func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			l.cursor = (l.cursor + 1) % n
 		case "enter":
 			l.curState.selectedIdx = l.cursor
-			newState := *l.curState
+			newState := l.curState
 			newState.page = editPage
 			return l, l.updateState(newState)
 		}
