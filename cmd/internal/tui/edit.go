@@ -33,10 +33,11 @@ type editModel struct {
 	cursorMode cursor.Mode
 }
 
-func initEditModel(session session.Session, updateState func(state) tea.Cmd) tea.Model {
+func initEditModel(session session.Session, curState state, updateState func(state) tea.Cmd) tea.Model {
 	m := editModel{
 		session:     session,
 		updateState: updateState,
+		curState:    curState,
 		inputs:      make([]textinput.Model, 5),
 	}
 
@@ -103,6 +104,7 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				newState := m.curState
 				newState.page = listPage
+				newState.selectedIdx = m.curState.selectedIdx
 				newState.selectedSession = newSession
 				return m, m.updateState(newState)
 			}

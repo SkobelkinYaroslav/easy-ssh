@@ -37,7 +37,7 @@ func InitMainModel(sessions []session.Session) tea.Model {
 
 	m.pageModels = []tea.Model{
 		initListModel(sessions, m.updateState, m.curState),
-		initEditModel(sessions[initialState.selectedIdx], m.updateState),
+		initEditModel(sessions[initialState.selectedIdx], m.curState, m.updateState),
 	}
 
 	return m
@@ -53,7 +53,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case state:
 		m.curState = msg
 		if m.curState.page == editPage {
-			m.pageModels[editPage] = initEditModel(m.sessions[m.curState.selectedIdx], m.updateState)
+			m.pageModels[editPage] = initEditModel(m.sessions[m.curState.selectedIdx], m.curState, m.updateState)
 		}
 		if m.curState.page == listPage {
 			m.sessions[m.curState.selectedIdx] = m.curState.selectedSession
