@@ -36,9 +36,10 @@ func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "down":
 			l.cursor = (l.cursor + 1) % n
 		case "enter":
-			l.curState.selectedIdx = l.cursor
 			newState := l.curState
 			newState.page = editPage
+			newState.selectedIdx = l.cursor
+			newState.selectedSession = l.connections[l.cursor]
 			return l, l.updateState(newState)
 		}
 	}

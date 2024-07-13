@@ -5,11 +5,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type state struct {
-	page        int
-	selectedIdx int
-}
-
 const (
 	listPage = iota
 	editPage
@@ -52,6 +47,7 @@ func (m mainModel) Init() tea.Cmd {
 	return nil
 }
 
+// TODO: maybe can make it better
 func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case state:
@@ -59,11 +55,21 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.curState.page == editPage {
 			m.pageModels[editPage] = initEditModel(m.sessions[m.curState.selectedIdx], m.updateState)
 		}
+		if m.curState.page == listPage {
+			m.sessions[m.curState.selectedIdx] = m.curState.selectedSession
+			m.pageModels[listPage] = initListModel(m.sessions, m.updateState, m.curState)
+		}
 	case tea.KeyMsg:
-		currentPageModel := m.pageModels[m.curState.page]
-		newPageModel, cmd := currentPageModel.Update(msg)
-		m.pageModels[m.curState.page] = newPageModel
-		return m, cmd
+		switch msg.String() {
+		case "ctrl+c":
+			return m, tea.Quit
+		default:
+			currentPageModel := m.pageModels[m.curState.page]
+			newPageModel, cmd := currentPageModel.Update(msg)
+			m.pageModels[m.curState.page] = newPageModel
+			return m, cmd
+		}
+
 	}
 
 	return m, nil
