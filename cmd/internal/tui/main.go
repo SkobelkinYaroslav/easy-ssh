@@ -22,16 +22,11 @@ type mainModel struct {
 	updateState func(state) tea.Cmd
 }
 
-func InitMainModel() tea.Model {
+func InitMainModel(sessions []session.Session) tea.Model {
 	updateState := func(s state) tea.Cmd {
 		return func() tea.Msg {
 			return s
 		}
-	}
-	sessions := []session.Session{
-		session.New("Session1", "User1", "host1.example.com", "password1", 22),
-		session.New("Session2", "User2", "host2.example.com", "password2", 2222),
-		session.New("Session3", "User3", "host3.example.com", "password3", 3333),
 	}
 
 	initialState := state{

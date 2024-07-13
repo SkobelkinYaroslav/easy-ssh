@@ -24,11 +24,18 @@ func New(sessionName, userName, host, password string, port int) Session {
 	}
 }
 
-func NewFromFile(fileName string) ([]Session, error) {
-	file, err := os.ReadFile(fileName)
+func GetFromFile() ([]Session, error) {
+	workDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("session.GetFromFile: error while saving to file: %w", err)
+	}
+
+	fileDir := workDir + "/.essh/session.json"
+
+	file, err := os.ReadFile(fileDir)
 
 	if err != nil {
-		return nil, fmt.Errorf("session.newFromFile: error while reading file %s: %w", fileName, err)
+		return nil, fmt.Errorf("session.newFromFile: error while reading file %s: %w", fileDir, err)
 	}
 
 	var sessionArray []Session
