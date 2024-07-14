@@ -12,9 +12,9 @@ const (
 
 type mainModel struct {
 	curState    state
+	updateState func(state) tea.Cmd
 	pageModels  []tea.Model
 	sessions    []session.Session
-	updateState func(state) tea.Cmd
 }
 
 func InitMainModel(sessions []session.Session) tea.Model {
@@ -47,9 +47,12 @@ func (m mainModel) Init() tea.Cmd {
 	return nil
 }
 
-// TODO: maybe can make it better
 func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.QuitMsg:
+		if err := session.SaveToFile(m.sessions); err != nil {
+			return nil, nil
+		}
 	case state:
 		m.curState = msg
 		if m.curState.page == editPage {

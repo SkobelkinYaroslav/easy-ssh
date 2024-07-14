@@ -24,10 +24,12 @@ var (
 )
 
 type editModel struct {
+	// Manage state
 	session     session.Session
 	updateState func(state) tea.Cmd
 	curState    state
 
+	// TUI stuff
 	focusIndex int
 	inputs     []textinput.Model
 	cursorMode cursor.Mode
@@ -86,39 +88,31 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "tab", "shift+tab", "enter", "up", "down":
+		case "enter":
+			port, err := strconv.Atoi(m.inputs[3].Value())
+			if err != nil {
+				return m, nil
+			}
+			newSession := session.Session{
+				SessionName: m.inputs[0].Value(),
+				UserName:    m.inputs[1].Value(),
+				Host:        m.inputs[2].Value(),
+				Port:        port,
+				Password:    m.inputs[4].Value(),
+			}
+
+			m.curState.SetPage(listPage)
+			m.curState.SetSelectedSession(newSession)
+			m.curState.SetCurIdx(m.curState.selectedIdx)
+			return m, m.updateState(m.curState)
+
+		case "tab", "shift+tab", "up", "down":
 			s := msg.String()
 
-			if s == "enter" {
-				port, err := strconv.Atoi(m.inputs[3].Value())
-				if err != nil {
-					return m, nil
-				}
-				newSession := session.Session{
-					SessionName: m.inputs[0].Value(),
-					UserName:    m.inputs[1].Value(),
-					Host:        m.inputs[2].Value(),
-					Port:        port,
-					Password:    m.inputs[4].Value(),
-				}
-
-				newState := m.curState
-				newState.page = listPage
-				newState.selectedIdx = m.curState.selectedIdx
-				newState.selectedSession = newSession
-				return m, m.updateState(newState)
-			}
-
 			if s == "up" || s == "shift+tab" {
-				m.focusIndex--
+				m.focusIndex = (m.focusIndex - 1 + len(m.inputs)) % len(m.inputs)
 			} else {
-				m.focusIndex++
-			}
-
-			if m.focusIndex > len(m.inputs)-1 {
-				m.focusIndex = 0
-			} else if m.focusIndex < 0 {
-				m.focusIndex = len(m.inputs) - 1
+				m.focusIndex = (m.focusIndex + 1) % len(m.inputs)
 			}
 
 			cmds := make([]tea.Cmd, len(m.inputs))

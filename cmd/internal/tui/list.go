@@ -7,7 +7,6 @@ import (
 )
 
 type listModel struct {
-	cursor      int
 	connections []session.Session
 	updateState func(state) tea.Cmd
 	curState    state
@@ -15,7 +14,6 @@ type listModel struct {
 
 func initListModel(connections []session.Session, updateState func(state) tea.Cmd, curState state) tea.Model {
 	return listModel{
-		cursor:      0,
 		connections: connections,
 		updateState: updateState,
 		curState:    curState,
@@ -27,34 +25,36 @@ func (l listModel) Init() tea.Cmd {
 }
 
 func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	n := len(l.connections)
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "up":
-			l.cursor = (l.cursor - 1 + n) % n
-		case "down":
-			l.cursor = (l.cursor + 1) % n
-		case "enter":
-			newState := l.curState
-			newState.page = editPage
-			newState.selectedIdx = l.cursor
-			newState.selectedSession = l.connections[l.cursor]
-			return l, l.updateState(newState)
-		}
+		return l.handleKeyMsg(msg)
+	}
+	return l, nil
+}
+
+func (l listModel) handleKeyMsg(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	n := len(l.connections)
+	switch msg.String() {
+	case "up":
+		l.curState.SetCurIdx((l.curState.selectedIdx - 1 + n) % n)
+	case "down":
+		l.curState.SetCurIdx((l.curState.selectedIdx + 1) % n)
+	case "enter":
+		l.curState.SetPage(editPage)
+		l.curState.SetSelectedSession(l.connections[l.curState.selectedIdx])
+		return l, l.updateState(l.curState)
 	}
 	return l, nil
 }
 
 func (l listModel) View() string {
 	s := "Current connections:\n"
-
 	for i, connection := range l.connections {
-		if l.cursor == i {
-			s += "> "
+		prefix := "  "
+		if l.curState.selectedIdx == i {
+			prefix = "> "
 		}
-		s += fmt.Sprintf("%s\n", connection.SessionName)
+		s += fmt.Sprintf("%s%s\n", prefix, connection.SessionName)
 	}
-
 	return s
 }
