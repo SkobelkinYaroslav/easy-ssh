@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"essh/cmd/internal/session"
+	"essh/internal/session"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 )

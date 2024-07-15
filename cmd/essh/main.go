@@ -1,8 +1,8 @@
 package main
 
 import (
-	"essh/cmd/internal/session"
-	"essh/cmd/internal/tui"
+	"essh/internal/session"
+	"essh/internal/tui"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"os"

@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"essh/cmd/internal/session"
+	"essh/internal/session"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"strconv"
