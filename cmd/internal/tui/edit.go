@@ -2,7 +2,6 @@ package tui
 
 import (
 	"essh/cmd/internal/session"
-	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"strconv"
@@ -15,7 +14,6 @@ type editModel struct {
 	// TUI stuff
 	focusIndex int
 	inputs     []textinput.Model
-	cursorMode cursor.Mode
 }
 
 func initEditModel(session *session.Session) tea.Model {
@@ -104,7 +102,6 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.inputs[i].TextStyle = blurredStyle
 				}
 			}
-			cmds = append(cmds)
 
 			return m, tea.Batch(cmds...)
 

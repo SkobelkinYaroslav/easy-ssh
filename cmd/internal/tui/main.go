@@ -18,7 +18,6 @@ type openEditor struct {
 
 type mainModel struct {
 	page       int
-	current    tea.Model
 	pageModels []tea.Model
 	sessions   []session.Session
 }
@@ -44,7 +43,10 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if tea.Key(msg).String() == "ctrl+c" {
-			session.SaveToFile(m.sessions)
+			err := session.SaveToFile(m.sessions)
+			if err != nil {
+				return nil, nil
+			}
 			return m, tea.Quit
 		}
 		var cmd tea.Cmd
