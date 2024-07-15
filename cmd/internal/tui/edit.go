@@ -2,32 +2,15 @@ package tui
 
 import (
 	"essh/cmd/internal/session"
-	"fmt"
 	"github.com/charmbracelet/bubbles/cursor"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"strconv"
-	"strings"
-)
-
-var (
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle
-	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle
-	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-
-	focusedButton = focusedStyle.Render("[ Submit ]")
-	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
 )
 
 type editModel struct {
-	// Manage state
-	session     session.Session
-	updateState func(state) tea.Cmd
-	curState    state
+	// Current session
+	session *session.Session
 
 	// TUI stuff
 	focusIndex int
@@ -35,12 +18,10 @@ type editModel struct {
 	cursorMode cursor.Mode
 }
 
-func initEditModel(session session.Session, curState state, updateState func(state) tea.Cmd) tea.Model {
+func initEditModel(session *session.Session) tea.Model {
 	m := editModel{
-		session:     session,
-		updateState: updateState,
-		curState:    curState,
-		inputs:      make([]textinput.Model, 5),
+		session: session,
+		inputs:  make([]textinput.Model, 5),
 	}
 
 	var t textinput.Model
@@ -93,23 +74,19 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				return m, nil
 			}
-			newSession := session.Session{
-				SessionName: m.inputs[0].Value(),
-				UserName:    m.inputs[1].Value(),
-				Host:        m.inputs[2].Value(),
-				Port:        port,
-				Password:    m.inputs[4].Value(),
-			}
 
-			m.curState.SetPage(listPage)
-			m.curState.SetSelectedSession(newSession)
-			m.curState.SetCurIdx(m.curState.selectedIdx)
-			return m, m.updateState(m.curState)
+			m.session.SetSessionName(m.inputs[0].Value())
+			m.session.SetUserName(m.inputs[1].Value())
+			m.session.SetHost(m.inputs[2].Value())
+			m.session.SetPort(port)
+			m.session.SetPassword(m.inputs[4].Value())
 
-		case "tab", "shift+tab", "up", "down":
+			return m, updateListFunc()
+
+		case "up", "down":
 			s := msg.String()
 
-			if s == "up" || s == "shift+tab" {
+			if s == "up" {
 				m.focusIndex = (m.focusIndex - 1 + len(m.inputs)) % len(m.inputs)
 			} else {
 				m.focusIndex = (m.focusIndex + 1) % len(m.inputs)
@@ -130,7 +107,9 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds)
 
 			return m, tea.Batch(cmds...)
+
 		}
+
 	}
 
 	newInput, cmd := m.inputs[m.focusIndex].Update(msg)
@@ -139,16 +118,16 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m editModel) View() string {
-	var b strings.Builder
+	var s string
 
 	for i := range m.inputs {
-		b.WriteString(m.inputs[i].View())
+		s += m.inputs[i].View()
 		if i < len(m.inputs)-1 {
-			b.WriteRune('\n')
+			s += "\n"
 		}
 	}
 
-	b.WriteString("\n\nPress enter to submit")
+	s += "\n\nPress enter to submit"
 
-	return b.String()
+	return s
 }

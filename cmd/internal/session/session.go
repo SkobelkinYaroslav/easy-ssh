@@ -24,6 +24,30 @@ func New(sessionName, userName, host, password string, port int) Session {
 	}
 }
 
+func (s *Session) SetSessionName(sessionName string) {
+	s.SessionName = sessionName
+}
+
+func (s *Session) SetUserName(userName string) {
+	s.UserName = userName
+}
+
+func (s *Session) SetHost(host string) {
+	s.Host = host
+}
+
+func (s *Session) SetPort(port int) {
+	s.Port = port
+}
+
+func (s *Session) SetPassword(password string) {
+	s.Password = password
+}
+
+func (s *Session) String() Session {
+	return *s
+}
+
 func GetFromFile() ([]Session, error) {
 	workDir, err := os.UserHomeDir()
 	if err != nil {
