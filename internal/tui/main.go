@@ -52,14 +52,22 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.page = listPage
 		m.pageModels[listPage] = l
 	case updateListItem:
-		e := initEditModel(msg.ind, msg.session)
-		m.page = editPage
-		m.pageModels[editPage] = e
-		//case updateListItem:
-		//	m.sessions[msg.ind] = msg.session
-		//	l := initListModel(m.sessions)
-		//	m.page = listPage
-		//	m.pageModels[listPage] = l
+		switch m.page {
+		case editPage:
+			if len(m.sessions) == msg.ind {
+				m.sessions = append(m.sessions, msg.session)
+			} else {
+				m.sessions[msg.ind] = msg.session
+			}
+			l := initListModel(m.sessions)
+			m.page = listPage
+			m.pageModels[listPage] = l
+		case listPage:
+			e := initEditModel(msg.ind, msg.session)
+			m.page = editPage
+			m.pageModels[editPage] = e
+		}
+
 	}
 	return m, nil
 }

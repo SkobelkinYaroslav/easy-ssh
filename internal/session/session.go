@@ -9,12 +9,23 @@ type Session struct {
 }
 
 func New(sessionName, userName, host, password string, port int) Session {
+
 	return Session{
 		SessionName: sessionName,
 		UserName:    userName,
 		Host:        host,
 		Port:        port,
 		Password:    password,
+	}
+}
+
+func NewDefault() Session {
+	return Session{
+		SessionName: "Test Session",
+		UserName:    "yourName",
+		Host:        "1.1.1.1",
+		Port:        22,
+		Password:    "password",
 	}
 }
 

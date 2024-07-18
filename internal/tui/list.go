@@ -23,9 +23,6 @@ func (l listModel) Init() tea.Cmd {
 
 func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	n := len(l.connections)
-	if n == 0 {
-		return l, nil
-	}
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -36,6 +33,8 @@ func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			l.cursor = (l.cursor + 1) % n
 		case "enter":
 			return l, updateListItemFunc(l.cursor, l.connections[l.cursor])
+		case "a":
+			return l, updateListItemFunc(len(l.connections), session.NewDefault())
 		case "d", "del":
 			if len(l.connections) > 0 {
 				l.connections = append((l.connections)[:l.cursor], (l.connections)[l.cursor+1:]...)
