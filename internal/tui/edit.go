@@ -9,15 +9,17 @@ import (
 
 type editModel struct {
 	// Current session
-	session *session.Session
+	ind     int
+	session session.Session
 
 	// TUI stuff
 	focusIndex int
 	inputs     []textinput.Model
 }
 
-func initEditModel(session *session.Session) tea.Model {
+func initEditModel(ind int, session session.Session) tea.Model {
 	m := editModel{
+		ind:     ind,
 		session: session,
 		inputs:  make([]textinput.Model, 5),
 	}
@@ -79,7 +81,7 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.session.SetPort(port)
 			m.session.SetPassword(m.inputs[4].Value())
 
-			return m, updateListFunc()
+			return m, updateListItemFunc(m.ind, m.session)
 
 		case "up", "down":
 			s := msg.String()

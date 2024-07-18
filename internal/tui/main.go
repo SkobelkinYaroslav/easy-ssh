@@ -10,12 +10,6 @@ const (
 	editPage
 )
 
-type updateList struct{}
-
-type openEditor struct {
-	selectedSession int
-}
-
 type mainModel struct {
 	page       int
 	pageModels []tea.Model
@@ -29,7 +23,7 @@ func InitMainModel(sessions []session.Session) tea.Model {
 
 	m.pageModels = []tea.Model{
 		initListModel(sessions),
-		initEditModel(&session.Session{}),
+		initEditModel(0, session.Session{}),
 	}
 
 	return m
@@ -53,16 +47,19 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pageModels[m.page], cmd = m.pageModels[m.page].Update(msg)
 		return m, cmd
 	case updateList:
-		l := initListModel(m.sessions)
+		l := initListModel(msg.sessions)
+		m.sessions = msg.sessions
 		m.page = listPage
 		m.pageModels[listPage] = l
-		return m, nil
-	case openEditor:
-		e := initEditModel(&m.sessions[msg.selectedSession])
+	case updateListItem:
+		e := initEditModel(msg.ind, msg.session)
 		m.page = editPage
 		m.pageModels[editPage] = e
-		return m, nil
-
+		//case updateListItem:
+		//	m.sessions[msg.ind] = msg.session
+		//	l := initListModel(m.sessions)
+		//	m.page = listPage
+		//	m.pageModels[listPage] = l
 	}
 	return m, nil
 }

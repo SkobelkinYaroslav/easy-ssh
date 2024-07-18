@@ -1,17 +1,30 @@
 package tui
 
 import (
+	"essh/internal/session"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func updateListFunc() tea.Cmd {
+type updateList struct {
+	sessions []session.Session
+}
+
+type updateListItem struct {
+	ind     int
+	session session.Session
+}
+
+func updateListFunc(sessions []session.Session) tea.Cmd {
 	return func() tea.Msg {
-		return updateList{}
+		return updateList{sessions: sessions}
 	}
 }
 
-func openEditorFunc(ind int) tea.Cmd {
+func updateListItemFunc(ind int, s session.Session) tea.Cmd {
 	return func() tea.Msg {
-		return openEditor{selectedSession: ind}
+		return updateListItem{
+			ind:     ind,
+			session: s,
+		}
 	}
 }

@@ -9,10 +9,9 @@ import (
 )
 
 func main() {
-	sessions := []session.Session{
-		session.New("Session1", "User1", "host1.example.com", "password1", 22),
-		session.New("Session2", "User2", "host2.example.com", "password2", 2222),
-		session.New("Session3", "User3", "host3.example.com", "password3", 3333),
+	sessions, err := session.GetFromFile()
+	if err != nil {
+		
 	}
 	p := tea.NewProgram(tui.InitMainModel(sessions))
 	if _, err := p.Run(); err != nil {
