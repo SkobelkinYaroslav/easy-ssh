@@ -33,9 +33,9 @@ func initEditModel(ind int, session session.Session) tea.Model {
 		switch i {
 		case 0:
 			t.Placeholder = "Session Name"
-			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
+			t.Focus()
 			t.SetValue(session.SessionName)
 		case 1:
 			t.Placeholder = "User Name"
@@ -70,8 +70,23 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			port, err := strconv.Atoi(m.inputs[3].Value())
-			if err != nil {
+			isValid := true
+			if !session.IsValidUsername(m.inputs[1].Value()) {
+				m.inputs[1].TextStyle = errorStyle
+				isValid = false
+			}
+
+			if !session.IsValidHostname(m.inputs[2].Value()) {
+				m.inputs[2].TextStyle = errorStyle
+				isValid = false
+			}
+			port, ok := session.IsValidPort(m.inputs[3].Value())
+			if !ok {
+				m.inputs[3].TextStyle = errorStyle
+				isValid = false
+			}
+
+			if !isValid {
 				return m, nil
 			}
 

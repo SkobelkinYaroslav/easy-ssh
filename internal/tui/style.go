@@ -6,6 +6,7 @@ import (
 )
 
 var (
+	errorStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
 	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	cursorStyle         = focusedStyle
