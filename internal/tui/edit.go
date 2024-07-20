@@ -40,9 +40,13 @@ func initEditModel(ind int, session session.Session) tea.Model {
 		case 1:
 			t.SetValue(session.UserName)
 			t.Placeholder = "User Name"
+			t.PromptStyle = blurredStyle
+			t.TextStyle = blurredStyle
 		case 2:
 			t.SetValue(session.Host)
 			t.Placeholder = "Host"
+			t.PromptStyle = blurredStyle
+			t.TextStyle = blurredStyle
 		case 3:
 			if session.Port == 0 {
 				t.SetValue("22")
@@ -51,11 +55,15 @@ func initEditModel(ind int, session session.Session) tea.Model {
 			}
 			t.Placeholder = "Port"
 			t.CharLimit = 6
+			t.PromptStyle = blurredStyle
+			t.TextStyle = blurredStyle
 		case 4:
 			t.Placeholder = "Password"
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
 			t.SetValue(session.Password)
+			t.PromptStyle = blurredStyle
+			t.TextStyle = blurredStyle
 		}
 
 		m.inputs[i] = t

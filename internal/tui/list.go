@@ -5,6 +5,7 @@ import (
 	client "essh/internal/ssh"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
+	"strings"
 )
 
 type listModel struct {
@@ -70,19 +71,40 @@ func (l listModel) View() string {
 		return "No connections available.\n"
 	}
 
-	s := "Current connections:\n"
+	maxLength := 0
+	for _, conn := range l.connections {
+		displayName := conn.SessionName
+		if !conn.IsConnectable {
+			displayName = errorStyle.Render(conn.SessionName + " (unreachable)")
+		} else {
+			displayName = focusedStyle.Render(conn.SessionName)
+		}
+		if len(displayName) > maxLength {
+			maxLength = len(displayName)
+		}
+	}
 
+	s := "Current connections:\n"
 	for i, connection := range l.connections {
 		prefix := "  "
 		if l.cursor == i {
 			prefix = "> "
 		}
+
 		sessionName := connection.SessionName
-		if connection.IsConnectable {
-			s += fmt.Sprintf("%s%s\n", prefix, sessionName)
+		if !connection.IsConnectable {
+			sessionName += " (unreachable)"
+			sessionName = errorStyle.Render(sessionName)
 		} else {
-			s += errorStyle.Render(fmt.Sprintf("%s%s (unreachable)\n", prefix, sessionName))
+			if l.cursor == i {
+				sessionName = focusedStyle.Render(sessionName)
+			} else {
+				sessionName = blurredStyle.Render(sessionName)
+			}
 		}
+
+		padding := strings.Repeat(" ", maxLength-len(sessionName))
+		s += fmt.Sprintf("%s%s%s\n", prefix, sessionName, padding)
 	}
 	return s
 }
