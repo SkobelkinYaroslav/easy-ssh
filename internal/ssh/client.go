@@ -58,13 +58,18 @@ func ConnectWithPassword(session session.Session) (*ssh.Client, error) {
 }
 
 func SpawnShell(client *ssh.Client) error {
-	defer client.Close()
+	defer func(client *ssh.Client) {
+		err := client.Close()
+		if err != nil {
+			fmt.Printf("Error closing client: %v\n", err)
+		}
+	}(client)
 
-	session, err := client.NewSession()
+	sess, err := client.NewSession()
 	if err != nil {
 		return fmt.Errorf("failed to create session: %s", err)
 	}
-	defer session.Close()
+	defer sess.Close()
 
 	fd := int(os.Stdin.Fd())
 	oldState, err := term.MakeRaw(fd)
@@ -73,9 +78,9 @@ func SpawnShell(client *ssh.Client) error {
 	}
 	defer term.Restore(fd, oldState)
 
-	session.Stdout = os.Stdout
-	session.Stderr = os.Stderr
-	session.Stdin = os.Stdin
+	sess.Stdout = os.Stdout
+	sess.Stderr = os.Stderr
+	sess.Stdin = os.Stdin
 
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          1,
@@ -83,15 +88,15 @@ func SpawnShell(client *ssh.Client) error {
 		ssh.TTY_OP_OSPEED: 14400,
 	}
 
-	if err := session.RequestPty("xterm", 80, 40, modes); err != nil {
+	if err := sess.RequestPty("xterm", 80, 40, modes); err != nil {
 		return fmt.Errorf("request for pseudo terminal failed: %s", err)
 	}
 
-	if err := session.Shell(); err != nil {
+	if err := sess.Shell(); err != nil {
 		return fmt.Errorf("failed to start shell: %s", err)
 	}
 
-	if err := session.Wait(); err != nil {
+	if err := sess.Wait(); err != nil {
 		return fmt.Errorf("failed to wait for session: %s", err)
 	}
 

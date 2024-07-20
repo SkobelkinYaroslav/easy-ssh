@@ -3,15 +3,12 @@ package tui
 import (
 	"essh/internal/session"
 	client "essh/internal/ssh"
-	"github.com/charmbracelet/bubbles/list"
+	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"log"
 )
 
 type listModel struct {
 	cursor      int
-	list        list.Model
 	connections []session.Session
 }
 
@@ -38,17 +35,22 @@ func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			return l, updateListItemFunc(l.cursor, l.connections[l.cursor])
 		case "a":
-			return l, updateListItemFunc(len(l.connections), session.NewDefault())
+			return l, updateListItemFunc(len(l.connections), session.New("", "", "", "", 0))
 		case "c":
+			if len(l.connections) == 0 {
+				return l, nil
+			}
 			conn, err := client.ConnectWithPassword(l.connections[l.cursor])
 			if err != nil {
-				log.Println(err)
+				l.connections[l.cursor].SetConnectable(false)
+				return l, nil
 			}
 			err = client.SpawnShell(conn)
 			if err != nil {
-				log.Println(err)
+				l.connections[l.cursor].SetConnectable(false)
+				return l, nil
 			}
-			return l, tea.Quit
+			return l, nil
 
 		case "d", "del":
 			if len(l.connections) > 0 {
@@ -64,21 +66,23 @@ func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (l listModel) View() string {
-	lipgloss.NewStyle().Margin(1, 2).Render(l.list.View())
-}
+	if len(l.connections) == 0 {
+		return "No connections available.\n"
+	}
 
-//func (l listModel) View() string {
-//	if len(l.connections) == 0 {
-//		return "No connections available.\n"
-//	}
-//
-//	s := "Current connections:\n"
-//	for i, connection := range l.connections {
-//		prefix := "  "
-//		if l.cursor == i {
-//			prefix = "> "
-//		}
-//		s += fmt.Sprintf("%s%s\n", prefix, connection.SessionName)
-//	}
-//	return s
-//}
+	s := "Current connections:\n"
+
+	for i, connection := range l.connections {
+		prefix := "  "
+		if l.cursor == i {
+			prefix = "> "
+		}
+		sessionName := connection.SessionName
+		if connection.IsConnectable {
+			s += fmt.Sprintf("%s%s\n", prefix, sessionName)
+		} else {
+			s += errorStyle.Render(fmt.Sprintf("%s%s (unreachable)\n", prefix, sessionName))
+		}
+	}
+	return s
+}

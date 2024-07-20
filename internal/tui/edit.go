@@ -35,23 +35,27 @@ func initEditModel(ind int, session session.Session) tea.Model {
 			t.Placeholder = "Session Name"
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
-			t.Focus()
 			t.SetValue(session.SessionName)
+			t.Focus()
 		case 1:
-			t.Placeholder = "User Name"
 			t.SetValue(session.UserName)
+			t.Placeholder = "User Name"
 		case 2:
-			t.Placeholder = "Host"
 			t.SetValue(session.Host)
+			t.Placeholder = "Host"
 		case 3:
+			if session.Port == 0 {
+				t.SetValue("22")
+			} else {
+				t.SetValue(strconv.Itoa(session.Port))
+			}
 			t.Placeholder = "Port"
 			t.CharLimit = 6
-			t.SetValue(strconv.Itoa(session.Port))
 		case 4:
 			t.Placeholder = "Password"
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
-			t.SetValue("sample text")
+			t.SetValue(session.Password)
 		}
 
 		m.inputs[i] = t
@@ -90,13 +94,21 @@ func (m editModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 
-			m.session.SetSessionName(m.inputs[0].Value())
-			m.session.SetUserName(m.inputs[1].Value())
-			m.session.SetHost(m.inputs[2].Value())
-			m.session.SetPort(port)
-			m.session.SetPassword(m.inputs[4].Value())
+			newSession := session.New(
+				m.inputs[0].Value(),
+				m.inputs[1].Value(),
+				m.inputs[2].Value(),
+				m.inputs[4].Value(),
+				port,
+			)
 
-			return m, updateListItemFunc(m.ind, m.session)
+			//m.session.SetSessionName(m.inputs[0].Value())
+			//m.session.SetUserName(m.inputs[1].Value())
+			//m.session.SetHost(m.inputs[2].Value())
+			//m.session.SetPort(port)
+			//m.session.SetPassword(m.inputs[4].Value())
+
+			return m, updateListItemFunc(m.ind, newSession)
 
 		case "up", "down":
 			s := msg.String()

@@ -1,21 +1,23 @@
 package session
 
 type Session struct {
-	SessionName string `json:"sessionName"`
-	UserName    string `json:"userName"`
-	Host        string `json:"host"`
-	Port        int    `json:"port,omitempty"`
-	Password    string `json:"password,omitempty"`
+	SessionName   string `json:"sessionName"`
+	UserName      string `json:"userName"`
+	Host          string `json:"host"`
+	Port          int    `json:"port,omitempty"`
+	Password      string `json:"password,omitempty"`
+	IsConnectable bool   `json:"isConnectable"`
 }
 
 func New(sessionName, userName, host, password string, port int) Session {
 
 	return Session{
-		SessionName: sessionName,
-		UserName:    userName,
-		Host:        host,
-		Port:        port,
-		Password:    password,
+		SessionName:   sessionName,
+		UserName:      userName,
+		Host:          host,
+		Port:          port,
+		Password:      password,
+		IsConnectable: true,
 	}
 }
 
@@ -49,6 +51,6 @@ func (s *Session) SetPassword(password string) {
 	s.Password = password
 }
 
-func (s *Session) String() Session {
-	return *s
+func (s *Session) SetConnectable(state bool) {
+	s.IsConnectable = state
 }
