@@ -28,3 +28,9 @@ func updateListItemFunc(ind int, s session.Session) tea.Cmd {
 		}
 	}
 }
+
+func connectToSession(session session.Session) tea.Cmd {
+	return func() tea.Msg {
+		return session
+	}
+}

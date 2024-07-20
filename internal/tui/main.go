@@ -67,7 +67,11 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.page = editPage
 			m.pageModels[editPage] = e
 		}
-
+		//case session.Session:
+		//	connect, err := client.Connect(msg)
+		//	if err != nil {
+		//		return nil, nil
+		//	}
 	}
 	return m, nil
 }

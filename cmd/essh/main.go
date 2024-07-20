@@ -11,7 +11,7 @@ import (
 func main() {
 	sessions, err := session.GetFromFile()
 	if err != nil {
-		
+		panic(err)
 	}
 	p := tea.NewProgram(tui.InitMainModel(sessions))
 	if _, err := p.Run(); err != nil {
