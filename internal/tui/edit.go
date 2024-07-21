@@ -2,10 +2,32 @@ package tui
 
 import (
 	"essh/internal/session"
+	"fmt"
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"strconv"
 )
+
+type keyMapEdit struct {
+	Up   key.Binding
+	Down key.Binding
+	Help key.Binding
+	Quit key.Binding
+	Save key.Binding
+}
+
+func (k keyMapEdit) ShortHelp() []key.Binding {
+	return []key.Binding{k.Help}
+}
+
+func (k keyMapEdit) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Up, k.Down},
+		{k.Save, k.Quit},
+	}
+}
 
 type editModel struct {
 	// Current session
@@ -15,14 +37,39 @@ type editModel struct {
 	// TUI stuff
 	focusIndex int
 	inputs     []textinput.Model
+	keys       keyMapEdit
+	help       help.Model
 }
 
 func initEditModel(ind int, session session.Session) tea.Model {
+	var keys = keyMapEdit{
+		Up: key.NewBinding(
+			key.WithKeys("up"),
+			key.WithHelp("↑", "move up"),
+		),
+		Down: key.NewBinding(
+			key.WithKeys("down"),
+			key.WithHelp("↓", "move down"),
+		),
+		Quit: key.NewBinding(
+			key.WithKeys("ctrl+c"),
+			key.WithHelp("ctrl+c", "quit"),
+		),
+		Save: key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("enter", "save"),
+		),
+	}
+
 	m := editModel{
 		ind:     ind,
 		session: session,
 		inputs:  make([]textinput.Model, 5),
+		keys:    keys,
+		help:    help.New(),
 	}
+
+	m.help.ShowAll = true
 
 	var t textinput.Model
 	for i := range m.inputs {
@@ -161,7 +208,7 @@ func (m editModel) View() string {
 		}
 	}
 
-	s += "\n\nPress enter to submit"
+	s += fmt.Sprintf("\n\n%s\n", m.help.View(m.keys))
 
 	return s
 }

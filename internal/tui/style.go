@@ -1,19 +1,12 @@
 package tui
 
 import (
-	"fmt"
 	"github.com/charmbracelet/lipgloss"
 )
 
 var (
-	errorStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-	cursorStyle         = focusedStyle
-	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle
-	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-
-	focusedButton = focusedStyle.Render("[ Submit ]")
-	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
+	errorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#ff0000"))
+	focusedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#f7f7f7"))
+	blurredStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262"))
+	cursorStyle  = focusedStyle
 )

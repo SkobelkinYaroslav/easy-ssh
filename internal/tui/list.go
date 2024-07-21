@@ -4,17 +4,80 @@ import (
 	"essh/internal/session"
 	client "essh/internal/ssh"
 	"fmt"
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"strings"
 )
 
+type keyMapList struct {
+	Up      key.Binding
+	Down    key.Binding
+	Edit    key.Binding
+	Help    key.Binding
+	Connect key.Binding
+	Quit    key.Binding
+	Delete  key.Binding
+	Add     key.Binding
+}
+
+func (k keyMapList) ShortHelp() []key.Binding {
+	return []key.Binding{k.Help}
+}
+
+func (k keyMapList) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Up, k.Down},
+		{k.Help, k.Quit},
+		{k.Add, k.Edit, k.Connect, k.Delete},
+	}
+}
+
 type listModel struct {
+	keys        keyMapList
+	help        help.Model
 	cursor      int
 	connections []session.Session
 }
 
 func initListModel(connections []session.Session) tea.Model {
+	var keys = keyMapList{
+		Up: key.NewBinding(
+			key.WithKeys("up"),
+			key.WithHelp("↑", "move up"),
+		),
+		Down: key.NewBinding(
+			key.WithKeys("down"),
+			key.WithHelp("↓", "move down"),
+		),
+		Edit: key.NewBinding(
+			key.WithKeys("e"),
+			key.WithHelp("e", "edit entry"),
+		),
+		Help: key.NewBinding(
+			key.WithKeys("?"),
+			key.WithHelp("?", "toggle help"),
+		),
+		Connect: key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("enter", "connect"),
+		),
+		Quit: key.NewBinding(
+			key.WithKeys("ctrl+c"),
+			key.WithHelp("ctrl+c", "quit"),
+		),
+		Delete: key.NewBinding(
+			key.WithKeys("d"),
+			key.WithHelp("d", "delete entry"),
+		),
+		Add: key.NewBinding(
+			key.WithKeys("a"),
+			key.WithHelp("a", "add entry"),
+		),
+	}
+
 	return listModel{
+		keys:        keys,
+		help:        help.New(),
 		connections: connections,
 	}
 }
@@ -61,6 +124,8 @@ func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 			return l, updateListFunc(l.connections)
+		case "?":
+			l.help.ShowAll = !l.help.ShowAll
 		}
 	}
 	return l, nil
@@ -69,19 +134,6 @@ func (l listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (l listModel) View() string {
 	if len(l.connections) == 0 {
 		return "No connections available.\n"
-	}
-
-	maxLength := 0
-	for _, conn := range l.connections {
-		displayName := conn.SessionName
-		if !conn.IsConnectable {
-			displayName = errorStyle.Render(conn.SessionName + " (unreachable)")
-		} else {
-			displayName = focusedStyle.Render(conn.SessionName)
-		}
-		if len(displayName) > maxLength {
-			maxLength = len(displayName)
-		}
 	}
 
 	s := "Current connections:\n"
@@ -103,8 +155,10 @@ func (l listModel) View() string {
 			}
 		}
 
-		padding := strings.Repeat(" ", maxLength-len(sessionName))
-		s += fmt.Sprintf("%s%s%s\n", prefix, sessionName, padding)
+		s += fmt.Sprintf("%s%s\n", prefix, sessionName)
 	}
+
+	s += fmt.Sprintf("%s\n", l.help.View(l.keys))
+
 	return s
 }
